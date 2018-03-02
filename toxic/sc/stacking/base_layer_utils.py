@@ -8,21 +8,37 @@ from sklearn.svm import LinearSVC
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.metrics import roc_auc_score
 from scipy.sparse import csr_matrix, hstack, vstack
+import lightgbm as lgb
 
 from enum import Enum
 class ModelName(Enum):
     XGB = 1
-    LGB = 2
-    LOGREG = 3
-    NBSVM = 4
-    RF = 5 # random forest
-    RNN = 6
+    NBXGB = 2
+    LGB = 3
+    NBLGB = 4
+    LOGREG = 5
+    NBSVM = 6
     NBLSVC = 7
-    ONESVC = 8
-    ONELOGREG = 9
+    RF = 8 # random forest
+    RNN = 9
+    ONESVC = 10
+    ONELOGREG = 11
 
 
 class BaseLayerEstimator(ABC):
+    
+    def _pr(self, y_i, y, train_features):
+        p = train_features[np.array(y==y_i)].sum(0)
+        return (p + 1) / (np.array(y == y_i).sum() + 1)
+    
+    def _nb(self, x_train, y_train):
+        assert isinstance(y_train, pd.DataFrame)
+        r = {}
+        for col in y_train.columns:
+            print('calculating naive bayes for {}'.format(col))
+            r[col] = np.log(self._pr(1, y_train[col].values, x_train) / self._pr(0, y_train[col], x_train))
+        return r
+    
     @abstractmethod
     def train(self, x_train, y_train):
         """
@@ -38,7 +54,7 @@ class BaseLayerEstimator(ABC):
     
     
 
-class OneVSOneReg(BaseLayerEstimator):
+class OneVSOneRegBLE(BaseLayerEstimator):
     def __init__(self, x_train, y_train, model='logistic'):
         """
         x_train: sparse matrix, raw tfidf
@@ -201,17 +217,71 @@ class XgbBLE(BaseLayerEstimator):
 from sklearn.feature_selection import SelectFromModel
 
 class LightgbmBLE(BaseLayerEstimator):
-    def __init__(self, seed=0, params=None):
-        self.param = params
-        #self.param['seed'] = seed
-        self.nrounds = params.pop('num_iterations', 100)
+    def __init__(self, x_train, y_train, params=None, nb=True, seed=0):
+        """
+        constructor:
+
+            x_train: should be a np/scipy/ 2-d array or matrix. only be used when nb is true
+            y_train: should be a dataframe
+            
+        Example:
+            ll = LightgbmBLE(train_tfidf, train[label_cols], params=params, nb=True)
+            result = pd.DataFrame()
+            for col in label_cols:
+                    print(col)
+                    ll.train(train_tfidf, train[col], col)
+                    result[col] = ll.predict(test_tfidf, col)
+        """
+        #### check naive bayes
+        if nb:
+            print('Naive Bayes is enabled')
+            self.r = self._nb(x_train, y_train)
+        else:
+            print('Naive Bayes is disabled')
+            self.r = None
+        ##### set values    
+        self.nb = nb
+        self.set_params(params)
+        print('LightgbmBLE is initialized')
     
-    def train(self, x_train, y_train):
-        dtrain = lgb.Dataset(x_train, label=y_train)
-        self.gbdt = lgb.train(self.param, dtrain, self.nrounds, verbose_eval=10)
     
-    def predict(self, x):
-        return self.gbdt.predict(x)
+    def set_params(self, params):
+        self.params = params
+    
+    
+    
+    def _pre_process(self, x_train, y_train, label=None):
+        if self.nb:
+            if label is None:
+                raise ValueError('Naive Bayes is enabled. label cannot be None.')
+            print('apply naive bayes to feature set')
+            x = x_train.multiply(self.r[label])
+            if isinstance(x_train, csr_matrix):
+                x = x.tocsr()
+        else:
+            x = x_train
+        if isinstance(y_train, pd.Series):
+            y = y_train.values
+        else:
+            y = y_train
+        return (x, y)
+    
+    
+    def train(self, x_train, y_train, label=None):
+        x, y = self._pre_process(x_train, y_train, label)
+        lgb_train = lgb.Dataset(x, y)
+        lgb_eval = lgb.Dataset(x, y, reference=lgb_train)
+        self.model = lgb.train(self.params, lgb_train, valid_sets=lgb_eval, verbose_eval=20)
+        
+        
+    def predict(self, x_train, label=None):
+        x, _ = self._pre_process(x_train, y_train=None, label=label)
+        print('starting predicting')
+        result = self.model.predict(x)
+        print('predicting done')
+        return result
+        
+            
 
 from keras.layers import Dense, Embedding, Input, LSTM, Bidirectional, GlobalMaxPool1D, Dropout, BatchNormalization
 from keras.models import Model
