@@ -12,7 +12,7 @@ from scipy.sparse import csr_matrix, hstack, vstack
 
 
 
-def onevsone_data_process():
+def tfidf_data_process():
     """
     wei/Toxic/models/data/cleaned_train.csv
     wei/Toxic/models/data/cleaned_test.csv
