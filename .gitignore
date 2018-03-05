@@ -1,3 +1,5 @@
+*.csv
+*.hdf5
 .ipynb_checkpoints
 toxic/jc/data
 # Compiled source #

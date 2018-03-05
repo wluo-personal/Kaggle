@@ -1,0 +1,161 @@
+\documentclass{beamer}
+
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{subfigure,movie15}
+
+\setbeamertemplate{footline}[frame number]
+
+\begin{document}
+
+\begin{frame}{Project Situation}
+\begin{align*}
+&OLD\_TEST\_SET + LOG\_LOSS\\to\ \ &NEW\_TEST\_SET + LOG\_LOSS\\to\ \ &NEW\_TEST\_SET + AUC\_score\\
+&reference:\ Kaggle\ kernels\ and\ discussions
+\end{align*}
+\end{frame}
+
+\begin{frame}{Text Cleaning}
+\begin{enumerate}
+	\item fill NA
+	\item cut words (nltk TweetTokenizer) ("say." to "say ." but "!!!!!!" to "!!!")
+	\item convert (i'm, he's ...) to (i am, he is...) (a list online)
+	\item remove IP address, username, http links
+	\item remove irrelevant symbols (for now = " $\sim$ $\backslash n$)
+	\item lemmatize verb (am was to be) and noun (cats to cat, but will convert as to a) using nltk package
+	\item delete - ("non-degenerate" to "non degenerate")
+	\item (have not done) correct spelling (kiddddding, pleeeeeese, mothjer etc.) (textblob, but can make mistakes)
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Models}
+\begin{enumerate}
+	\item using word embedding:\begin{enumerate}
+	\item LSTM (RNN, can also try GRU)
+	\item CNN
+	\end{enumerate}
+	\item using bag of words:\begin{enumerate}
+	\item (NB)LOGREG
+	\item (NB)NN
+	\end{enumerate}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Word Embedding}
+\begin{enumerate}
+	\item keras text\_to\_sequence (convert to bag of word then change the text sequence to index sequence) take a max\_feature param
+	\item keras Embedding + GloVe (change index sequence to a list of vectors using GloVe: Global Vectors for Word Representation) + Attention (a dense layer before output)
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{bag of words}
+\begin{enumerate}
+	\item tf-idf for words (now use ngram=(1,2)) and characters (now use ngram=(1,5)) with sklearn
+	\item take nltk english stopping words as stop words
+	\item words: use top 20,000 and char: use top 35,000
+	\item next feature engineering
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Feature Engineering (Behavior not good)}
+ 'word\_count', 'cleaned\_word\_count'
+, 'unique\_word\_count', 'cleaned\_unique\_word\_count', 'question\_marks'
+, 'consecutive\_question\_marks', 'exclamation\_marks'
+, 'consecutive\_exclamation\_marks', 'uppercase\_letters', 'ellipsis', 'period'
+, 'parentheses\_pair', 'special\_symbol', 'sentence', 'upper\_word\_ratio'
+, 'unique\_word\_ratio', 'mark\_count\_ratio'
+\end{frame}
+
+\begin{frame}{Ensemble}
+\begin{enumerate}
+	\item using catboost (for now only tried all results as input (bad behavior))
+	\item plain ensemble (take mean of each column of the results)
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Future}
+\begin{enumerate}
+	\item for text cleaning: find more pattern, remove useless symbols
+	\item feature engineering: for different label using different features (behave relatively bad on certain labels)
+	\item column-wised catboost ensemble and add features combined with predicted results
+	\item grid search for the best params for plain ensemble
+	\item column-wised CNN, LSTM
+	\item For new value function, have not tried Naive Bayes to be weight for logistic regression and neural network
+	\item may need more accounts for submission, and cluster for running deep LSTM, CNN and NN
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{APPO}
+"aren't" : "are not",
+"can't" : "cannot",
+"couldn't" : "could not",
+"didn't" : "did not",
+"doesn't" : "does not",
+"don't" : "do not",
+"hadn't" : "had not",
+"hasn't" : "has not",
+"haven't" : "have not",
+"he'd" : "he would",
+"he'll" : "he will",
+"he's" : "he is",
+"i'd" : "i would",
+"i'd" : "i had",
+"i'll" : "i will",
+"i'm" : "i am",
+"im" : "i am",
+"isn't" : "is not",
+"it's" : "it is",
+"it'll":"it will",
+"i've" : "i have",
+"ive" : "i have",
+"let's" : "let us",
+"mightn't" : "might not",
+"mustn't" : "must not",
+"shan't" : "shall not",
+"she'd" : "she would",
+"she'll" : "she will",
+"she's" : "she is",
+"shouldn't" : "should not",
+"that's" : "that is",
+"there's" : "there is",
+"they'd" : "they would",
+"they'll" : "they will",
+"they're" : "they are",
+"they've" : "they have",
+"we'd" : "we would",
+"we're" : "we are",
+"weren't" : "were not",
+"we've" : "we have",
+"what'll" : "what will",
+"what're" : "what are",
+"what's" : "what is",
+"what've" : "what have",
+"where's" : "where is",
+"who'd" : "who would",
+"who'll" : "who will",
+"who're" : "who are",
+"who's" : "who is",
+"who've" : "who have"...
+\end{frame}
+
+\begin{frame}{Current}
+By, now, our best: 0.9800 (Rank 529) (not with the best models), current LB: 0.9874\\
+\end{frame}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
