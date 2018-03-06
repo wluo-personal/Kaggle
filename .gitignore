@@ -2,6 +2,7 @@
 *.hdf5
 .ipynb_checkpoints
 toxic/jc/data
+*.pyc
 # Compiled source #
 ###################
 *.com
