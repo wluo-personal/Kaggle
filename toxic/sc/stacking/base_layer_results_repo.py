@@ -101,9 +101,10 @@ class BaseLayerResultsRepo:
                         self.remove(key)
             else: # chosen_ones != None
                 assert type(chosen_ones) == list
-                for model_data_id in chosen_ones:
-                    self.remove(model_data_id)
-            
+                for model_data_id in model_data_id_list_temp:
+                    if model_data_id not in chosen_ones:
+                        self.remove(model_data_id)
+                
             self._save_lock = False # not actually removed, so set it back to True
 
             r1, r2, r3 = self._layer1_oof_train, self._layer1_oof_test, self._base_layer_est_preds
