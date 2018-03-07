@@ -388,8 +388,8 @@ class BaseLayerDataRepo():
     
     def add_data(self, data_id, x_train, x_test, y_train, label_cols, compatible_model=[ModelName.LOGREG], rnn_data=False):
         """
-        x_train, x_test: ndarray
-        y_train: pd df
+        x_train, x_test: nparray. use .values.reshape(-1,1) to convert pd.Series to nparray
+        y_train: pd df, with columns names = label columns
         """
         temp = {}
         
