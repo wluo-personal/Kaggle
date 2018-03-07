@@ -1,3 +1,4 @@
+toxic/sc/stacking/obj/
 *.csv
 *.hdf5
 .ipynb_checkpoints
