@@ -12,7 +12,7 @@ from scipy.sparse import csr_matrix, hstack, vstack
 
 
 
-def tfidf_data_process():
+def tfidf_data_process(word_ngram,char_ngram,char_max_df=1,skipgram=False):
     """
     wei/Toxic/models/data/cleaned_train.csv
     wei/Toxic/models/data/cleaned_test.csv
@@ -32,13 +32,28 @@ def tfidf_data_process():
     test_sentence_retain_punctuation = test['comment_text_cleaned_retain_punctuation']
     print('loading data done!')
     #########################################
-    phrase_vectorizer = TfidfVectorizer(ngram_range=(1,3), ###1,3
+    if stop_words:
+        phrase_vectorizer = TfidfVectorizer(ngram_range=word_ngram, ###1,3
+                                    strip_accents='unicode', 
+                                    max_features=100000, 
+                                    analyzer='word',
+                                    sublinear_tf=True,
+                                    stop_words='english',
+                                    token_pattern=r'\w{1,}')
+        char_vectorizer = TfidfVectorizer(ngram_range=(2,5),  ###2,5
+                                      strip_accents='unicode', 
+                                      max_features=200000, 
+                                      analyzer='char', 
+                                      stop_words='english',
+                                      sublinear_tf=True)
+    else:
+        phrase_vectorizer = TfidfVectorizer(ngram_range=(1,3), ###1,3
                                     strip_accents='unicode', 
                                     max_features=100000, 
                                     analyzer='word',
                                     sublinear_tf=True,
                                     token_pattern=r'\w{1,}')
-    char_vectorizer = TfidfVectorizer(ngram_range=(2,5),  ###2,5
+        char_vectorizer = TfidfVectorizer(ngram_range=(2,5),  ###2,5
                                       strip_accents='unicode', 
                                       max_features=200000, 
                                       analyzer='char', 
