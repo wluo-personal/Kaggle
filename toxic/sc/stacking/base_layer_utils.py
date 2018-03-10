@@ -17,12 +17,13 @@ class ModelName(Enum):
     LGB = 3
     NBLGB = 4
     LOGREG = 5
-    NBSVM = 6
-    NBLSVC = 7
-    RF = 8 # random forest
-    RNN = 9
-    ONESVC = 10
-    ONELOGREG = 11
+    NBSVM = 6 # NBLOGREG
+    LSVC = 7
+    NBLSVC = 8
+    RF = 9 # random forest
+    RNN = 10
+    ONESVC = 11
+    ONELOGREG = 12
 
 
 class BaseLayerEstimator(ABC):
@@ -274,15 +275,19 @@ class XGBoostBLE(BaseLayerEstimator):
         print('predicting done')
         return result
 
-from sklearn.feature_selection import SelectFromModel
-
+    
 class LightgbmBLE(BaseLayerEstimator):
-    def __init__(self, x_train, y_train, params=None, nb=True, seed=0):
+    def __init__(self, x_train, y_train, label_cols= None, params=None, nb=True, seed=0):
         """
         constructor:
 
             x_train: should be a np/scipy/ 2-d array or matrix. only be used when nb is true
             y_train: should be a dataframe
+            label_cols: (list) if y_train contains multiple labels, provide the list of label names
+                e.g.: label_cols = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
+            params: (dict)
+            nb: (boolean) compute naive bayes or not. (helpful for unbalanced data)
+            seed: (int) training random seed (not used currently)
             
         Example:
             ll = LightgbmBLE(train_tfidf, train[label_cols], params=params, nb=True)
@@ -302,6 +307,7 @@ class LightgbmBLE(BaseLayerEstimator):
         ##### set values    
         self.nb = nb
         self.set_params(params)
+        self.label_cols = label_cols
         print('LightgbmBLE is initialized')
     
     
@@ -314,6 +320,8 @@ class LightgbmBLE(BaseLayerEstimator):
         if self.nb:
             if label is None:
                 raise ValueError('Naive Bayes is enabled. label cannot be None.')
+            if label not in self.label_cols:
+                raise ValueError('Label not in label_cols')
             print('apply naive bayes to feature set')
             x = x_train.multiply(self.r[label])
             if isinstance(x_train, csr_matrix):
@@ -327,33 +335,83 @@ class LightgbmBLE(BaseLayerEstimator):
         return (x, y)
     
     
-    def train(self, x_train, y_train, label=None):
+    def train(self, x_train, y_train, label=None, valid_set_percent=0):
+        """
+        Params:
+            x_train: np/scipy/ 2-d array or matrix
+            y_train: should be a dataframe
+            label: (str) if not none, then it's one of the labels in the label_cols
+                    if nb is set to True when initializing, when label can not be None
+            valid_set_percent: (float, 0 to 1). 
+                    0: no validation set. (imposible to use early stopping)
+                    1: use training set as validation set (to check underfitting, and early stopping)
+                    >0 and <1: use a portion of training set as validation set. (to check overfitting, and early stopping)
+        
+        """
         x, y = self._pre_process(x_train, y_train, label)
+        
+        if valid_set_percent != 0:
+            if valid_set_percent > 1 or valid_set_percent < 0:
+                raise ValueError('valid_set_percent must >= 0 and <= 1')
+            if valid_set_percent != 1:
+                x, x_val, y, y_val = train_test_split(x, y, test_size=valid_set_percent)
+
+
         lgb_train = lgb.Dataset(x, y)
-        lgb_eval = lgb.Dataset(x, y, reference=lgb_train)
-        self.model = lgb.train(self.params, lgb_train, valid_sets=lgb_eval, verbose_eval=20)
+        if valid_set_percent != 0:
+            if valid_set_percent == 1:
+                print('Evaluating using training set')
+                self.model = lgb.train(self.params, lgb_train, valid_sets=lgb_train)
+            else:
+                lgb_val = lgb.Dataset(x_val, y_val)
+                print('Evaluating using validation set ({}% of training set)'.format(valid_set_percent*100))
+                self.model = lgb.train(self.params, lgb_train, valid_sets=lgb_val)
+        else:
+            print('No evaluation set, thus not possible to use early stopping. Please train with your best params.')
+            self.model = lgb.train(self.params, lgb_train)
         
         
     def predict(self, x_train, label=None):
+        import pdb
+        pdb.set_trace()
         x, _ = self._pre_process(x_train, y_train=None, label=label)
         print('starting predicting')
-        result = self.model.predict(x)
+        if self.model.best_iteration > 0:
+            print('best_iteration {} is chosen.'.format(best_iteration))
+            result = self.model.predict(x, num_iteration=bst.best_iteration)
+        else:
+            result = self.model.predict(x)
         print('predicting done')
         return result
         
             
+            
 
 from keras.layers import Dense, Embedding, Input, LSTM, Bidirectional, GlobalMaxPool1D, Dropout, BatchNormalization
 from keras.models import Model
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 
 class RnnBLE(BaseLayerEstimator):
-    def __init__(self, window_length, n_features, label_cols, rnn_units=50, dense_units=50, dropout=0.1, mode='LSTM', bidirection=True, batch_size=32, epochs=2):
-        self._model = RnnBLE.get_lstm_model(window_length, n_features, label_cols, rnn_units, dense_units, dropout, mode, bidirection)
-        self._batch_size = batch_size
-        self._epochs = epochs
+    def __init__(self, window_length, n_features, label_cols, rnn_units=50, dense_units=50, dropout=0.1, 
+                 mode='LSTM', bidirection=True):
+        self._window_length = window_length
+        self._n_features = n_features 
+        self._label_cols = label_cols 
+        self._rnn_units = rnn_units 
+        self._dense_units = dense_units
+        self._dropout = dropout
+        self._mode = mode
+        self._bidirection = bidirection
+        self.init_model()
         
+    def init_model(self, load_model=False, load_model_file=None):
+        self._model = RnnBLE.get_lstm_model(self._window_length, self._n_features, self._label_cols, 
+                                            self._rnn_units, self._dense_units, self._dropout, 
+                                            self._mode, self._bidirection, load_model, load_model_file)
+    
     @staticmethod
-    def get_lstm_model(window_length, n_features, label_cols, rnn_units, dense_units, dropout, mode, bidirection):
+    def get_lstm_model(window_length, n_features, label_cols, rnn_units, dense_units, 
+                       dropout, mode, bidirection, load_model, load_model_file):
         input = Input(shape=(window_length, n_features))
         rnn_layer = LSTM(rnn_units, return_sequences=True, dropout=dropout, recurrent_dropout=dropout)
         if mode == 'GRU':
@@ -367,20 +425,53 @@ class RnnBLE(BaseLayerEstimator):
         x = Dropout(dropout)(x)
         x = Dense(len(label_cols), activation='sigmoid')(x)
         model = Model(inputs=input, outputs=x)
+        
+        if (load_model):
+            print('load model: ' + str(load_model_file))
+            model.load_weights(load_model_file)
+        
         model.compile(loss='binary_crossentropy',
                       optimizer='adam',
                       metrics=['accuracy'])
         return model 
     
     
-    def train(self, x_train, y_train):
-        self._model.fit(x_train, y_train, batch_size=self._batch_size, epochs=self._epochs)
-        
+    def train(self, epochs, x_train=None, y_train=None, batch_size=None, callbacks=None, 
+              validation_split=0.0, validation_data=None, data_gen=None, 
+              training_steps_per_epoch=None, load_model=False, load_model_file=None):
+        if load_model:
+            if load_model_file is None:
+                raise ValueError('Since load model is True, please provide the load_model_file (path of the model)')
+            else:
+                self.init_model(load_model, load_model_file)
+        if data_gen is None:
+            if x_train is None or y_train is None or batch_size is None:
+                raise ValueError('Since not training with data generator, please provide: x_train, y_train, batch_size')
+            print('training without datagen')
+            self._model.fit(x_train, y_train, batch_size=batch_size, validation_split=validation_split, epochs=epochs, callbacks=callbacks)
+            return self._model # for chaining
+        else:
+            if training_steps_per_epoch is None:
+                raise ValueError('training_steps_per_epoch can not be None when using data_gen')
+            # with generator:
+            print('training with datagen')
     
-    def predict(self, x):
-        return self._model.predict(x)#, batch_size=1024)
+            self._model.fit_generator(
+                generator=data_gen,
+                steps_per_epoch=training_steps_per_epoch, 
+                epochs=epochs, 
+                validation_data=validation_data, # (x_val, y_val) 
+                callbacks=callbacks
+            )
+            return self._model
+            
     
+    def predict(self, x, load_model_file=None):
+        if load_model_file is not None:
+            self._model.load_weights(load_model_file)
+        return self._model.predict(x, verbose=1)#, batch_size=1024)
     
+
     
 class BaseLayerDataRepo():
     def __init__(self):
