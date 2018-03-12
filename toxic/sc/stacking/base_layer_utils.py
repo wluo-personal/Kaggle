@@ -166,6 +166,8 @@ from scipy import sparse
 from sklearn.calibration import CalibratedClassifierCV
 class NbSvmBLE(BaseLayerEstimator, BaseEstimator, ClassifierMixin):
     def __init__(self, mode=ModelName.NBSVM, seed=0, params=None):
+        if mode != ModelName.NBSVM and mode != ModelName.NBLSVC:
+            raise ValueError('Invalid mode. Valid modes: ModelName.NBSVM and ModelName.NBLSVC')
         self._mode = mode
         params['random_state'] = seed
         self._params = params
@@ -189,7 +191,8 @@ class NbSvmBLE(BaseLayerEstimator, BaseEstimator, ClassifierMixin):
         self._r = sparse.csr_matrix(np.log(pr(x,1,y) / pr(x,0,y)))
         x_nb = x.multiply(self._r)
         #self._clf = LogisticRegression(C=self.C, dual=self.dual, n_jobs=self.n_jobs).fit(x_nb, y)
-        self._clf = LogisticRegression(**self._params).fit(x_nb, y)
+        if self._mode == ModelName.NBSVM:
+            self._clf = LogisticRegression(**self._params).fit(x_nb, y)
         if self._mode == ModelName.NBLSVC:
             self._clf = CalibratedClassifierCV(LinearSVC(**self._params)).fit(x_nb, y)
 
