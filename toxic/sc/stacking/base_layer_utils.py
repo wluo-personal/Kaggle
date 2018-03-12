@@ -279,6 +279,37 @@ class XGBoostBLE(BaseLayerEstimator):
         return result
 
     
+class LogRegAndLsvcBLE(BaseLayerEstimator):
+    def __init__(self, mode=ModelName.LOGREG, seed=0, params=None):
+        if mode != ModelName.LOGREG and mode != ModelName.LSVC:
+            raise ValueError('Invalid mode. Valid modes: ModelName.LOGREG and ModelName.LSVC')
+        self._mode = mode
+        params['random_state'] = seed
+        self._seed = seed
+        self._params = params
+        
+    def set_params(self, params):
+        """
+        if need to set params for different labels, let params={} when constructing
+        so you can set seed, and use this one to set params per label
+        """
+        self._params = params
+        self._params['random_state'] = self._seed
+
+    def predict(self, x):
+        return self._clf.predict_proba(x)[:,1] # chance of being 1 ([:,0] chance of being 0)
+
+    def train(self, x_train, y_train):
+        if self._mode == ModelName.LOGREG:
+            self._clf = LogisticRegression(**self._params).fit(x_train, y_train)
+        if self._mode == ModelName.LSVC:
+            self._clf = CalibratedClassifierCV(LinearSVC(**self._params)).fit(x_train, y_train)
+    
+    def feature_importance(self):
+        return self._clf.feature_importance
+    
+    
+    
 class LightgbmBLE(BaseLayerEstimator):
     def __init__(self, x_train, y_train, label_cols= None, params=None, nb=True, seed=0):
         """
@@ -309,32 +340,35 @@ class LightgbmBLE(BaseLayerEstimator):
             self.r = None
         ##### set values    
         self.nb = nb
+        self.seed = seed
         self.set_params(params)
         self.label_cols = label_cols
         print('LightgbmBLE is initialized')
     
     
     def set_params(self, params):
+        """
+        if need to set params for different labels, let params={} when constructing
+        so you can set seed, and use this one to set params per label
+        """
         self.params = params
+        self.params['data_random_seed'] = self.seed
     
     
-    
-    def _pre_process(self, x_train, y_train, label=None):
+    def _pre_process(self, x, y, label=None):
         if self.nb:
             if label is None:
                 raise ValueError('Naive Bayes is enabled. label cannot be None.')
             if label not in self.label_cols:
                 raise ValueError('Label not in label_cols')
             print('apply naive bayes to feature set')
-            x = x_train.multiply(self.r[label])
-            if isinstance(x_train, csr_matrix):
+            x = x.multiply(self.r[label])
+            if isinstance(x, csr_matrix):
                 x = x.tocsr()
+        if isinstance(y, pd.Series):
+            y = y.values
         else:
-            x = x_train
-        if isinstance(y_train, pd.Series):
-            y = y_train.values
-        else:
-            y = y_train
+            y = y
         return (x, y)
     
     
@@ -374,10 +408,8 @@ class LightgbmBLE(BaseLayerEstimator):
             self.model = lgb.train(self.params, lgb_train)
         
         
-    def predict(self, x_train, label=None):
-        import pdb
-        pdb.set_trace()
-        x, _ = self._pre_process(x_train, y_train=None, label=label)
+    def predict(self, x_test, label=None):
+        x, _ = self._pre_process(x_test, y=None, label=label)
         print('starting predicting')
         if self.model.best_iteration > 0:
             print('best_iteration {} is chosen.'.format(best_iteration))
@@ -386,8 +418,7 @@ class LightgbmBLE(BaseLayerEstimator):
             result = self.model.predict(x)
         print('predicting done')
         return result
-        
-            
+              
             
 
 from keras.layers import Dense, Embedding, Input, LSTM, Bidirectional, GlobalMaxPool1D, Dropout, BatchNormalization
@@ -644,10 +675,11 @@ class BaseLayerResultsRepo:
                         self.remove(key)
             else: # chosen_ones != None
                 assert type(chosen_ones) == list
-                for model_data_id in chosen_ones:
-                    self.remove(model_data_id)
+                for model_data_id in model_data_id_list_temp:
+                    if model_data_id not in chosen_ones:
+                        self.remove(model_data_id)
             
-            self._save_lock = False # not actually removed, so set it back to True
+            self._save_lock = False # remove() called, but not actually removed, so set the lock back to False
 
             r1, r2, r3 = self._layer1_oof_train, self._layer1_oof_test, self._base_layer_est_preds
 
