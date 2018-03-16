@@ -21,9 +21,10 @@ class ModelName(Enum):
     LSVC = 7
     NBLSVC = 8
     RF = 9 # random forest
-    RNN = 10
-    ONESVC = 11
-    ONELOGREG = 12
+    ET = 10 # extra trees
+    RNN = 11
+    ONESVC = 12
+    ONELOGREG = 13
 
 
 class BaseLayerEstimator(ABC):
