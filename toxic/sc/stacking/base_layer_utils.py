@@ -29,18 +29,6 @@ class ModelName(Enum):
 
 class BaseLayerEstimator(ABC):
     
-    def _pr(self, y_i, y, train_features):
-        p = train_features[np.array(y==y_i)].sum(0)
-        return (p + 1) / (np.array(y == y_i).sum() + 1)
-    
-    def _nb(self, x_train, y_train):
-        assert isinstance(y_train, pd.DataFrame)
-        r = {}
-        for col in y_train.columns:
-            #print('calculating naive bayes for {}'.format(col))
-            r[col] = np.log(self._pr(1, y_train[col].values, x_train) / self._pr(0, y_train[col], x_train))
-        return r
-    
     @abstractmethod
     def train(self, x_train, y_train):
         """
@@ -54,7 +42,40 @@ class BaseLayerEstimator(ABC):
     def predict(self, x_train):
         pass
     
+from scipy.sparse import csr_matrix
+class BaseLayerEstimator(ABC):
     
+    @staticmethod
+    def _calculate_nb(x, y):
+        def pr(x, y_i, y):
+            p = x[y==y_i].sum(0)
+            return (p+1) / ((y==y_i).sum()+1)
+        return csr_matrix(np.log(pr(x,1,y) / pr(x,0,y)))
+  
+    @abstractmethod
+    def train(self, x_train, y_train):
+        """
+        Params:
+            x_train: np array
+            y_train: pd series
+        """
+        pass
+    
+    @abstractmethod
+    def predict(self, x_train):
+        pass
+    
+# def _pr(self, y_i, y, train_features):
+#     p = train_features[np.array(y==y_i)].sum(0)
+#     return (p + 1) / (np.array(y == y_i).sum() + 1)
+
+# def _nb(self, x_train, y_train):
+#     assert isinstance(y_train, pd.DataFrame)
+#     r = {}
+#     for col in y_train.columns:
+#         #print('calculating naive bayes for {}'.format(col))
+#         r[col] = np.log(self._pr(1, y_train[col].values, x_train) / self._pr(0, y_train[col], x_train))
+#     return r
 
 class OneVSOneRegBLE(BaseLayerEstimator):
     def __init__(self, x_train, y_train, model='logistic'):
@@ -174,13 +195,7 @@ class NbSvmBLE(BaseLayerEstimator, BaseEstimator, ClassifierMixin):
         self._params = params
 
 
-    def predict(self, x, label):
-        """
-            The label param is not needed before the nb in this class is calculated on the fly.   
-        in comparison, some other NB classes calculate the nb in init for each label, so 
-        they need the label param in the train and predict method to know which nb to apply
-        here, we put the label param just to be consistent with other NB classes
-        """
+    def predict(self, x):
         # Verify that model has been fit
         check_is_fitted(self, ['_r', '_clf'])
         #return self._clf.predict(x.multiply(self._r))
@@ -205,13 +220,7 @@ class NbSvmBLE(BaseLayerEstimator, BaseEstimator, ClassifierMixin):
 
         return self
     
-    def train(self, x_train, y_train, label): 
-        """
-            The label param is not needed before the nb in this class is calculated on the fly.   
-        in comparison, some other NB classes calculate the nb in init for each label, so 
-        they need the label param in the train and predict method to know which nb to apply
-        here, we put the label param just to be consistent with other NB classes
-        """
+    def train(self, x_train, y_train): 
         self.fit(x_train, y_train)
     
     def feature_importance(self):
@@ -219,77 +228,41 @@ class NbSvmBLE(BaseLayerEstimator, BaseEstimator, ClassifierMixin):
 
     
 import xgboost
-
 class XGBoostBLE(BaseLayerEstimator):
-    def __init__(self, x_train, y_train, params=None, nb=True, seed=0):
-        """
-        constructor:
-
-            x_train: should be a np/scipy/ 2-d array or matrix. only be used when nb is true
-            y_train: should be a dataframe
-            
-        Example:
-        params = {
-                'learning_rate': 0.2,
-                'max_depth': 6,
-                'nthread': 20,
-                'n_estimators' : 200,
-                'subsample': 0.8,
-                'colsample_bytree': 0.7,
-                'eval_metric': 'auc',
-                'verbose_eval': 10,
-                'silent': False
-                } 
-            xx = XGBoostBase(train_tfidf, train[label_cols], params=params, nb=True)
-        """
-        #### check naive bayes
-        if nb:
-            #print('Naive Bayes is enabled')
-            self.r = self._nb(x_train, y_train)
-        else:
-            #print('Naive Bayes is disabled')
-            self.r = None
-        ##### set values
-        self.seed = seed
-        self.nb = nb
-        self.set_params(params)
-        #print('XGBoostBase is initialized')
-    
+    def __init__(self, params=None, nb=True, seed=0):
+        self._seed = seed
+        self._nb = nb
+        self.set_params(params)    
     
     def set_params(self, params):
+        """
+        if need to set params for different labels, let params={} when constructing
+        so you can set seed, and use this one to set params per label
+        """
         self.params = params
-        self.params['seed'] = self.seed
+        self.params['seed'] = self._seed
+
     
-    
-    def _pre_process(self, x_train, y_train, label=None):
-        if self.nb:
-            assert label is not None
-            #print('apply naive bayes to feature set')
-            x = x_train.multiply(self.r[label])
-            if isinstance(x_train, csr_matrix):
-                x = x.tocsr()
-        else:
-            x = x_train
-        if isinstance(y_train, pd.Series):
-            y = y_train.values
-        else:
-            y = y_train
-        return (x, y)
-    
-    
-    def train(self, x_train, y_train, label=None):
-        x, y = self._pre_process(x_train, y_train, label)
+    def train(self, x, y):
+        """
+        Params:
+            x: np/scipy/ 2-d array or matrix
+            y: pandas series
+        """
+        if self._nb:
+            self._r = self._calculate_nb(x, y.values)
+            x = x.multiply(self._r)
         self.params['eval_set'] = [x, y]
         self.model = xgboost.XGBClassifier(**self.params)
         self.model.fit(x,y)
         
         
-    def predict(self, x_train, label=None):
-        x, _ = self._pre_process(x_train, y_train=None, label=label)
-        #print('starting predicting')
+    def predict(self, x, label=None):
+        if self._nb:
+            x = x.multiply(self._r)
         result = self.model.predict_proba(x)[:,1]
-        #print('predicting done')
         return result
+
 
     
 class LogRegAndLsvcBLE(BaseLayerEstimator):
@@ -313,8 +286,8 @@ class LogRegAndLsvcBLE(BaseLayerEstimator):
         return self._clf.predict_proba(x)[:,1] # chance of being 1 ([:,0] chance of being 0)
 
     def train(self, x_train, y_train):
-        import pdb
-        pdb.set_trace()
+        #import pdb
+        #pdb.set_trace()
         if self._mode == ModelName.LOGREG:
             self._clf = LogisticRegression(**self._params).fit(x_train, y_train)
         if self._mode == ModelName.LSVC:
@@ -324,42 +297,11 @@ class LogRegAndLsvcBLE(BaseLayerEstimator):
         return self._clf.feature_importance
     
     
-    
 class LightgbmBLE(BaseLayerEstimator):
-    def __init__(self, x_train, y_train, label_cols= None, params=None, nb=True, seed=0):
-        """
-        constructor:
-
-            x_train: should be a np/scipy/ 2-d array or matrix. only be used when nb is true
-            y_train: should be a dataframe
-            label_cols: (list) if y_train contains multiple labels, provide the list of label names
-                e.g.: label_cols = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
-            params: (dict)
-            nb: (boolean) compute naive bayes or not. (helpful for unbalanced data)
-            seed: (int) training random seed (not used currently)
-            
-        Example:
-            ll = LightgbmBLE(train_tfidf, train[label_cols], params=params, nb=True)
-            result = pd.DataFrame()
-            for col in label_cols:
-                    print(col)
-                    ll.train(train_tfidf, train[col], col)
-                    result[col] = ll.predict(test_tfidf, col)
-        """
-        #### check naive bayes
-        if nb:
-            #print('Naive Bayes is enabled')
-            self.r = self._nb(x_train, y_train)
-        else:
-            #print('Naive Bayes is disabled')
-            self.r = None
-        ##### set values    
-        self.nb = nb
-        self.seed = seed
+    def __init__(self, params=None, nb=True, seed=0):
+        self._nb = nb
+        self._seed = seed
         self.set_params(params)
-        self.label_cols = label_cols
-        #print('LightgbmBLE is initialized')
-    
     
     def set_params(self, params):
         """
@@ -367,40 +309,22 @@ class LightgbmBLE(BaseLayerEstimator):
         so you can set seed, and use this one to set params per label
         """
         self.params = params
-        self.params['data_random_seed'] = self.seed
+        self.params['data_random_seed'] = self._seed
     
-    
-    def _pre_process(self, x, y, label=None):
-        if self.nb:
-            if label is None:
-                raise ValueError('Naive Bayes is enabled. label cannot be None.')
-            if label not in self.label_cols:
-                raise ValueError('Label not in label_cols')
-            #print('apply naive bayes to feature set')
-            x = x.multiply(self.r[label])
-            if isinstance(x, csr_matrix):
-                x = x.tocsr()
-        if isinstance(y, pd.Series):
-            y = y.values
-        else:
-            y = y
-        return (x, y)
-    
-    
-    def train(self, x_train, y_train, label=None, valid_set_percent=0):
+    def train(self, x, y, valid_set_percent=0):
         """
         Params:
-            x_train: np/scipy/ 2-d array or matrix
-            y_train: should be a dataframe
-            label: (str) if not none, then it's one of the labels in the label_cols
-                    if nb is set to True when initializing, when label can not be None
+            x: np/scipy/ 2-d array or matrix
+            y: pandas series
             valid_set_percent: (float, 0 to 1). 
                     0: no validation set. (imposible to use early stopping)
                     1: use training set as validation set (to check underfitting, and early stopping)
                     >0 and <1: use a portion of training set as validation set. (to check overfitting, and early stopping)
         
         """
-        x, y = self._pre_process(x_train, y_train, label)
+        if self._nb:
+            self._r = self._calculate_nb(x, y.values)
+            x = x.multiply(self._r)
         
         if valid_set_percent != 0:
             if valid_set_percent > 1 or valid_set_percent < 0:
@@ -423,9 +347,9 @@ class LightgbmBLE(BaseLayerEstimator):
             self.model = lgb.train(self.params, lgb_train)
         
         
-    def predict(self, x_test, label=None):
-        x, _ = self._pre_process(x_test, y=None, label=label)
-        #print('starting predicting')
+    def predict(self, x, label=None):
+        if self._nb:
+            x = x.multiply(self._r)
         if self.model.best_iteration > 0:
             print('best_iteration {} is chosen.'.format(best_iteration))
             result = self.model.predict(x, num_iteration=bst.best_iteration)
@@ -433,7 +357,6 @@ class LightgbmBLE(BaseLayerEstimator):
             result = self.model.predict(x)
         #print('predicting done')
         return result
-              
             
 
 from keras.layers import Dense, Embedding, Input, LSTM, Bidirectional, GlobalMaxPool1D, Dropout, BatchNormalization
@@ -525,11 +448,41 @@ class RnnBLE(BaseLayerEstimator):
 class BaseLayerDataRepo():
     def __init__(self):
         self._data_repo = {}
+        
+    def add_tfidf_data(self, train_sentence, test_sentence, y_train, label_cols, compatible_models, 
+                       word_ngram, word_max, word_min_df=1, word_max_df=1.0,
+                       char_ngram=(0,0), char_max=100000, char_min_df=1, char_max_df=1.0):
+        """
+        Params:
+            train_sentence: pd.Series. Usually the sentence column of a dataframe.
+                e.g. train['comment_text]
+            test_sentence: pd.Series. Usually the sentence column of a dataframe.
+                e.g. test['comment_text]
+            y_train: pd df, with columns names = label_cols
+            label_cols: list of str. label column names
+            compatible_models: list of ModelName. The intented models that will use this dataset.
+                e.g. [ModelName.LGB, ModelName.LOGREG]
     
-    def add_data(self, data_id, x_train, x_test, y_train, label_cols, compatible_model=[ModelName.LOGREG], rnn_data=False):
+            word_ngram, word_max, word_min_df, word_max_df, char_ngram, char_max, char_min_df, char_max_df: tdidf params
+            
+        """
+        # although label_cols can be extracted from y_train, including it in params can 
+        # help make sure y_train is in right format. 
+        assert len(list(y_train.columns)) == len(label_cols)
+        assert set(list(y_train.columns)) - set(label_cols) == set()
+        x_train, x_test, data_id = tfidf_data_process(train_sentence, test_sentence, 
+                                                    word_ngram=(1,1), word_max=30000)
+        self.add_data(data_id, x_train, x_test, y_train, label_cols, compatible_models)
+        print('{} is added to the base layer data repo'.format(data_id))
+    
+    def add_data(self, data_id, x_train, x_test, y_train, label_cols, compatible_models, rnn_data=False):
         """
         x_train, x_test: nparray. use .values.reshape(-1,1) to convert pd.Series to nparray
         y_train: pd df, with columns names = label columns
+        label_cols: list of str. label column names
+        compatible_models: list of ModelName. The intented models that will use this dataset.
+            e.g. [ModelName.LGB, ModelName.LOGREG]
+        rnn_data: Boolean. Whether this data is for RNN
         """
         temp = {}
         
@@ -537,7 +490,7 @@ class BaseLayerDataRepo():
         temp['x_train'] = x_train
         temp['x_test'] = x_test
         temp['labes_cols'] = label_cols
-        temp['compatible_model'] = set(compatible_model)
+        temp['compatible_models'] = set(compatible_models)
         
         if rnn_data: 
             temp['y_train'] = y_train # here y_train is a df
@@ -555,20 +508,20 @@ class BaseLayerDataRepo():
     def remove_data(self, data_id):
         self._data_repo.pop(data_id, None)
         
-    def get_compatible_model(self, data_id):
-        return self._data_repo[data_id]['compatible_model']
+    def get_compatible_models(self, data_id):
+        return self._data_repo[data_id]['compatible_models']
     
     def remove_compatible_model(self, data_id, model_name):
-        return self._data_repo[data_id]['compatible_model'].discard(model_name)
+        return self._data_repo[data_id]['compatible_models'].discard(model_name)
     
     def add_compatible_model(self, data_id, model_name):
-        return self._data_repo[data_id]['compatible_model'].add(model_name)
+        return self._data_repo[data_id]['compatible_models'].add(model_name)
                   
     def get_data_by_compatible_model(self, model_name):
         data_to_return = []
         for data_id in self._data_repo.keys():
             data = self._data_repo[data_id]
-            if model_name in data['compatible_model']:
+            if model_name in data['compatible_models']:
                 data_to_return.append(data)
         return data_to_return
     
@@ -578,14 +531,90 @@ class BaseLayerDataRepo():
     def __str__(self):
         output = ''
         for data_id in self._data_repo.keys():
-            output+='data_id: {:20} \n\tx_train: {}\tx_test: {}\n\ty_train type: {}\n\tcompatible_model: {}\n '\
+            output+='data_id: {:20} \n\tx_train: {}\tx_test: {}\n\ty_train type: {}\n\tcompatible_models: {}\n '\
             .format(data_id, self._data_repo[data_id]['x_train'].shape, \
                     self._data_repo[data_id]['x_test'].shape, \
                     type(self._data_repo[data_id]['y_train']), \
-                    self._data_repo[data_id]['compatible_model'])
+                    self._data_repo[data_id]['compatible_models'])
         return output
     
     
+import pandas as pd
+import numpy as np
+from abc import ABC, abstractmethod
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer, TfidfTransformer
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.svm import LinearSVC
+from sklearn.calibration import CalibratedClassifierCV
+from sklearn.metrics import roc_auc_score
+from scipy.sparse import csr_matrix, hstack, vstack
+
+
+
+def tfidf_data_process(train_sentence, test_sentence, word_ngram, word_max, word_min_df=1, word_max_df=1.0,
+                       char_ngram=(0,0), char_max=100000, char_min_df=1, char_max_df=1.0):
+    """
+    Params:
+        train_sentence: pd.Series. Usually the sentence column of a dataframe.
+            e.g. train['comment_text]
+        test_sentence: pd.Series. Usually the sentence column of a dataframe.
+            e.g. test['comment_text]
+        
+        word_ngram, word_max, word_min_df, word_max_df, char_ngram, char_max, char_min_df, char_max_df: tdidf params
+
+    return :x_train: sparse matrix
+            y_train: DataFrame (containing all label columns)
+            x_test: sparse matrix
+            data_id: str, represents params
+    """ 
+    data_id = 'tfidf_word_{}_{}_{}_{}'.format(word_ngram, word_max, word_min_df, word_max_df)
+    
+    word_vectorizer = TfidfVectorizer(ngram_range=word_ngram, #1,3
+                                        strip_accents='unicode',
+                                        max_features=word_max,
+                                        min_df = word_min_df,
+                                        max_df = word_max_df,
+                                        analyzer='word',
+                                        stop_words='english',
+                                        sublinear_tf=True,
+                                        token_pattern=r'\w{1,}')
+    print('fitting word')
+    word_vectorizer.fit(train_sentence.values)
+    print('transforming train word')
+    train_word = word_vectorizer.transform(train_sentence.values)
+    print('transforming test word')
+    test_word = word_vectorizer.transform(test_sentence.values)
+
+    if char_ngram == (0,0):
+        print('tfidf(word level) done')
+        return (train_word, test_word, data_id)
+
+    else:
+        data_id = '{}_char_{}_{}_{}_{}'.format(data_id, char_ngram, char_max, char_min_df, char_max_df)
+
+        char_vectorizer = TfidfVectorizer(ngram_range=char_ngram,  #2,5
+                                          strip_accents='unicode',
+                                          max_features=char_max, #200000
+                                          min_df = char_min_df,
+                                          max_df = char_max_df,
+                                          analyzer='char',
+                                          sublinear_tf=True)
+
+        print('fitting char')
+        char_vectorizer.fit(train_sentence_retain_punctuation.values)
+        print('transforming train char')
+        train_char = char_vectorizer.transform(train_sentence.values)
+        print('transforming test char')
+        test_char = char_vectorizer.transform(test_sentence.values)
+
+        x_train = hstack((train_char, train_word), format='csr')
+        x_test = hstack((test_char, test_word), format='csr')
+
+        print('tfidf(word & char level) done')
+        return (x_train, x_test, data_id)
+    
+     
     
 import pickle
 def save_obj(obj, name ):
