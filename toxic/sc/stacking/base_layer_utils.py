@@ -37,7 +37,7 @@ class BaseLayerEstimator(ABC):
         assert isinstance(y_train, pd.DataFrame)
         r = {}
         for col in y_train.columns:
-            print('calculating naive bayes for {}'.format(col))
+            #print('calculating naive bayes for {}'.format(col))
             r[col] = np.log(self._pr(1, y_train[col].values, x_train) / self._pr(0, y_train[col], x_train))
         return r
     
@@ -83,22 +83,22 @@ class OneVSOneRegBLE(BaseLayerEstimator):
         
         
         for col in y_train.columns:
-            print('calculating naive bayes for {}'.format(col))
+            #print('calculating naive bayes for {}'.format(col))
             self.r[col] = np.log(self.pr(1, y_train[col].values, x_train) / self.pr(0, y_train[col], x_train))
-        print('initializing done')
-        print('OneVsOne is using {} kernel'.format(self.model_name))
+        #print('initializing done')
+        #print('OneVsOne is using {} kernel'.format(self.model_name))
         
     def setModelName(self, name):
         self.model_name = name
         assert self.model_name in ['logistic', 'svc']
-        print('OneVsOne is using {} kernel'.format(self.model_name))
+        #print('OneVsOne is using {} kernel'.format(self.model_name))
         
     def pr(self, y_i, y, train_features):
         p = train_features[np.array(y==y_i)].sum(0)
         return (p + 1) / (np.array(y == y_i).sum() + 1)
     
     def oneVsOneSplit(self, x_train, y_train, label):
-        print('Starting One vs One dataset splitting')
+        #print('Starting One vs One dataset splitting')
         if isinstance(y_train, pd.Series):
             y_train = y_train.values
         model_train = x_train[np.array(y_train == 1)]
@@ -111,7 +111,7 @@ class OneVSOneRegBLE(BaseLayerEstimator):
         y_model_stack = np.concatenate([y_model_train, y_non_model_train])
         x_nb = x_model_stack.multiply(self.r[label]).tocsr()
         y_nb = y_model_stack
-        print('splitting done!')
+        #print('splitting done!')
         return (x_nb, y_nb)
     
     def train(self, x_train, y_train, label):
@@ -119,26 +119,26 @@ class OneVSOneRegBLE(BaseLayerEstimator):
         x_nb, y_nb = self.oneVsOneSplit(x_train, y_train, label)
         ### start training
         if self.model_name is 'logistic':
-            print('start training logistic regression')
+            #print('start training logistic regression')
             self.model = LogisticRegression(C=self.param['logistic'][label])
             self.model.fit(x_nb, y_nb)
-            print('training done')
+            #print('training done')
             
         else:
-            print('start training linear svc regression')
+            #print('start training linear svc regression')
             lsvc = LinearSVC(C=self.param['svc'][label])
             self.model = CalibratedClassifierCV(lsvc) 
             self.model.fit(x_nb, y_nb)
-            print('training done')
+            #print('training done')
         
 
     
     def predict(self, x_test, label):
-        print('applying naive bayes to dataset')
+        #print('applying naive bayes to dataset')
         x_nb_test = x_test.multiply(self.r[label]).tocsr()
-        print('predicting')
+        #print('predicting')
         pred = self.model.predict_proba(x_nb_test)[:,1]
-        print('predicting done')
+        #print('predicting done')
         return pred
     
 ##### example        
@@ -174,7 +174,13 @@ class NbSvmBLE(BaseLayerEstimator, BaseEstimator, ClassifierMixin):
         self._params = params
 
 
-    def predict(self, x):
+    def predict(self, x, label):
+        """
+            The label param is not needed before the nb in this class is calculated on the fly.   
+        in comparison, some other NB classes calculate the nb in init for each label, so 
+        they need the label param in the train and predict method to know which nb to apply
+        here, we put the label param just to be consistent with other NB classes
+        """
         # Verify that model has been fit
         check_is_fitted(self, ['_r', '_clf'])
         #return self._clf.predict(x.multiply(self._r))
@@ -199,7 +205,13 @@ class NbSvmBLE(BaseLayerEstimator, BaseEstimator, ClassifierMixin):
 
         return self
     
-    def train(self, x_train, y_train):
+    def train(self, x_train, y_train, label): 
+        """
+            The label param is not needed before the nb in this class is calculated on the fly.   
+        in comparison, some other NB classes calculate the nb in init for each label, so 
+        they need the label param in the train and predict method to know which nb to apply
+        here, we put the label param just to be consistent with other NB classes
+        """
         self.fit(x_train, y_train)
     
     def feature_importance(self):
@@ -232,16 +244,16 @@ class XGBoostBLE(BaseLayerEstimator):
         """
         #### check naive bayes
         if nb:
-            print('Naive Bayes is enabled')
+            #print('Naive Bayes is enabled')
             self.r = self._nb(x_train, y_train)
         else:
-            print('Naive Bayes is disabled')
+            #print('Naive Bayes is disabled')
             self.r = None
         ##### set values
         self.seed = seed
         self.nb = nb
         self.set_params(params)
-        print('XGBoostBase is initialized')
+        #print('XGBoostBase is initialized')
     
     
     def set_params(self, params):
@@ -252,7 +264,7 @@ class XGBoostBLE(BaseLayerEstimator):
     def _pre_process(self, x_train, y_train, label=None):
         if self.nb:
             assert label is not None
-            print('apply naive bayes to feature set')
+            #print('apply naive bayes to feature set')
             x = x_train.multiply(self.r[label])
             if isinstance(x_train, csr_matrix):
                 x = x.tocsr()
@@ -274,9 +286,9 @@ class XGBoostBLE(BaseLayerEstimator):
         
     def predict(self, x_train, label=None):
         x, _ = self._pre_process(x_train, y_train=None, label=label)
-        print('starting predicting')
+        #print('starting predicting')
         result = self.model.predict_proba(x)[:,1]
-        print('predicting done')
+        #print('predicting done')
         return result
 
     
@@ -301,6 +313,8 @@ class LogRegAndLsvcBLE(BaseLayerEstimator):
         return self._clf.predict_proba(x)[:,1] # chance of being 1 ([:,0] chance of being 0)
 
     def train(self, x_train, y_train):
+        import pdb
+        pdb.set_trace()
         if self._mode == ModelName.LOGREG:
             self._clf = LogisticRegression(**self._params).fit(x_train, y_train)
         if self._mode == ModelName.LSVC:
@@ -334,17 +348,17 @@ class LightgbmBLE(BaseLayerEstimator):
         """
         #### check naive bayes
         if nb:
-            print('Naive Bayes is enabled')
+            #print('Naive Bayes is enabled')
             self.r = self._nb(x_train, y_train)
         else:
-            print('Naive Bayes is disabled')
+            #print('Naive Bayes is disabled')
             self.r = None
         ##### set values    
         self.nb = nb
         self.seed = seed
         self.set_params(params)
         self.label_cols = label_cols
-        print('LightgbmBLE is initialized')
+        #print('LightgbmBLE is initialized')
     
     
     def set_params(self, params):
@@ -362,7 +376,7 @@ class LightgbmBLE(BaseLayerEstimator):
                 raise ValueError('Naive Bayes is enabled. label cannot be None.')
             if label not in self.label_cols:
                 raise ValueError('Label not in label_cols')
-            print('apply naive bayes to feature set')
+            #print('apply naive bayes to feature set')
             x = x.multiply(self.r[label])
             if isinstance(x, csr_matrix):
                 x = x.tocsr()
@@ -411,13 +425,13 @@ class LightgbmBLE(BaseLayerEstimator):
         
     def predict(self, x_test, label=None):
         x, _ = self._pre_process(x_test, y=None, label=label)
-        print('starting predicting')
+        #print('starting predicting')
         if self.model.best_iteration > 0:
             print('best_iteration {} is chosen.'.format(best_iteration))
             result = self.model.predict(x, num_iteration=bst.best_iteration)
         else:
             result = self.model.predict(x)
-        print('predicting done')
+        #print('predicting done')
         return result
               
             
