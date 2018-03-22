@@ -26,15 +26,16 @@ def tfidf_data_process(word_ngram, word_max, word_min_df=1, word_max_df=1.0,
                                            char_ngram, char_max, char_min_df, char_max_df)
 
     
-    train = pd.read_csv('/home/kai/data/wei/Toxic/models/data/cleaned_train.csv')
-    test = pd.read_csv('/home/kai/data/wei/Toxic/models/data/cleaned_test.csv')
+    train = pd.read_csv('~/data/toxic/data/train_preprocessed_clean.csv')
+    test = pd.read_csv('~/data/toxic/data/test_preprocessed_clean.csv')
+    
     label_cols = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
 
     train_sentence = train['comment_text_cleaned_polarity']
     test_sentence = test['comment_text_cleaned_polarity']
 
-    train_sentence_retain_punctuation = train['comment_text_cleaned_retain_punctuation']
-    test_sentence_retain_punctuation = test['comment_text_cleaned_retain_punctuation']
+    train_sentence_retain_punctuation = train['comment_text_cleaned_polarity']#train['comment_text_polarity']
+    test_sentence_retain_punctuation = test['comment_text_cleaned_polarity']#test['comment_text_polarity']
     print('loading data done!')
     #########################################
     word_vectorizer = TfidfVectorizer(ngram_range=word_ngram, #1,3

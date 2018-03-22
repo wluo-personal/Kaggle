@@ -1,15 +1,16 @@
 import pickle
-def save_obj(obj, name ):
-    with open('obj/'+ name + '.pkl', 'wb') as f:
+def save_obj(obj, name, filepath):
+    with open(filepath + name + '.pkl', 'wb') as f:
         pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
 
-def load_obj(name ):
-    with open('obj/' + name + '.pkl', 'rb') as f:
+def load_obj(name, filepath):
+    with open(filepath + name + '.pkl', 'rb') as f:
         return pickle.load(f)
 
 import copy
 class BaseLayerResultsRepo:
-    def __init__(self, label_cols=['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate'], load_from_file=True):
+    def __init__(self, label_cols=['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate'], 
+                 load_from_file=True, filepath='obj/WithPreprocessedFile/'):
         self._layer1_oof_train = {}
         self._layer1_oof_test = {}
         for label in label_cols:
@@ -19,14 +20,15 @@ class BaseLayerResultsRepo:
         self._model_data_id_list = []
         self._base_layer_est_scores = {}
         self._label_cols = label_cols
+        self.filepath = filepath
         self._save_lock = False # will be set to True if remove() is invoked successfully
         if load_from_file:
             print('load from file')
-            self._layer1_oof_train = load_obj('13models_layer1_oof_train')
-            self._layer1_oof_test = load_obj('13models_layer1_oof_test')
-            self._base_layer_est_preds = load_obj('13models_base_layer_est_preds')
-            self._model_data_id_list = load_obj('13models_model_data_id_list')
-            self._base_layer_est_scores = load_obj('13models_base_layer_est_scores')
+            self._layer1_oof_train = load_obj('13models_layer1_oof_train', self.filepath)
+            self._layer1_oof_test = load_obj('13models_layer1_oof_test', self.filepath)
+            self._base_layer_est_preds = load_obj('13models_base_layer_est_preds', self.filepath)
+            self._model_data_id_list = load_obj('13models_model_data_id_list',self.filepath)
+            self._base_layer_est_scores = load_obj('13models_base_layer_est_scores',self.filepath)
 
     def get_model_data_id_list(self):
         return self._model_data_id_list
@@ -136,8 +138,8 @@ class BaseLayerResultsRepo:
             print('save function is locked due to some results removed from the repo. \
             Call unlock_save() to unlock the save function and save again.')
         else:
-            save_obj(self._model_data_id_list, '13models_model_data_id_list')
-            save_obj(self._layer1_oof_train, '13models_layer1_oof_train')
-            save_obj(self._layer1_oof_test, '13models_layer1_oof_test')
-            save_obj(self._base_layer_est_preds, '13models_base_layer_est_preds')
-            save_obj(self._base_layer_est_scores, '13models_base_layer_est_scores')
+            save_obj(self._model_data_id_list, '13models_model_data_id_list', self.filepath)
+            save_obj(self._layer1_oof_train, '13models_layer1_oof_train', self.filepath)
+            save_obj(self._layer1_oof_test, '13models_layer1_oof_test', self.filepath)
+            save_obj(self._base_layer_est_preds, '13models_base_layer_est_preds', self.filepath)
+            save_obj(self._base_layer_est_scores, '13models_base_layer_est_scores', self.filepath)
