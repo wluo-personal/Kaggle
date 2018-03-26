@@ -11,6 +11,10 @@ import copy
 class BaseLayerResultsRepo:
     def __init__(self, label_cols=['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate'], 
                  load_from_file=True, filepath='obj/WithPreprocessedFile/'):
+        """
+        To start a new repo, set load_from_file to False, and give it a valid filepath so that files can be saved
+        To load a save repo, set load_from_file to True, and give it the filepath
+        """
         self._layer1_oof_train = {}
         self._layer1_oof_test = {}
         for label in label_cols:
@@ -24,11 +28,11 @@ class BaseLayerResultsRepo:
         self._save_lock = False # will be set to True if remove() is invoked successfully
         if load_from_file:
             print('load from file')
-            self._layer1_oof_train = load_obj('13models_layer1_oof_train', self.filepath)
-            self._layer1_oof_test = load_obj('13models_layer1_oof_test', self.filepath)
-            self._base_layer_est_preds = load_obj('13models_base_layer_est_preds', self.filepath)
-            self._model_data_id_list = load_obj('13models_model_data_id_list',self.filepath)
-            self._base_layer_est_scores = load_obj('13models_base_layer_est_scores',self.filepath)
+            self._layer1_oof_train = load_obj('models_layer1_oof_train', self.filepath)
+            self._layer1_oof_test = load_obj('models_layer1_oof_test', self.filepath)
+            self._base_layer_est_preds = load_obj('models_base_layer_est_preds', self.filepath)
+            self._model_data_id_list = load_obj('models_model_data_id_list',self.filepath)
+            self._base_layer_est_scores = load_obj('models_base_layer_est_scores',self.filepath)
 
     def get_model_data_id_list(self):
         return self._model_data_id_list
@@ -136,10 +140,10 @@ class BaseLayerResultsRepo:
     def save(self):
         if self._save_lock:
             print('save function is locked due to some results removed from the repo. \
-            Call unlock_save() to unlock the save function and save again.')
+            If you are sure about these changes, call unlock_save() to unlock the save function and save again.')
         else:
-            save_obj(self._model_data_id_list, '13models_model_data_id_list', self.filepath)
-            save_obj(self._layer1_oof_train, '13models_layer1_oof_train', self.filepath)
-            save_obj(self._layer1_oof_test, '13models_layer1_oof_test', self.filepath)
-            save_obj(self._base_layer_est_preds, '13models_base_layer_est_preds', self.filepath)
-            save_obj(self._base_layer_est_scores, '13models_base_layer_est_scores', self.filepath)
+            save_obj(self._model_data_id_list, 'models_model_data_id_list', self.filepath)
+            save_obj(self._layer1_oof_train, 'models_layer1_oof_train', self.filepath)
+            save_obj(self._layer1_oof_test, 'models_layer1_oof_test', self.filepath)
+            save_obj(self._base_layer_est_preds, 'models_base_layer_est_preds', self.filepath)
+            save_obj(self._base_layer_est_scores, 'models_base_layer_est_scores', self.filepath)
