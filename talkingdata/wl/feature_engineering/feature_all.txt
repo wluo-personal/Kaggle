@@ -1,3 +1,1 @@
-train 92:   hour_minute_second_reversemean   			 size: 11.939557872712612 G.
-test 92:   hour_minute_second_reversemean   			 size: 14.279990278184414 G.
-------
+all 29:   hour_minute_second_mean   			 size: 28.65053141117096 G.
