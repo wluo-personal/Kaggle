@@ -1,1 +1,1 @@
-all 14:   ip_app_os_day_hour_count   			 size: 18.86742313206196 G.
+all 51:   ip_app_device_os_channel_lasttimediff   			 size: 44.72278072685003 G.
