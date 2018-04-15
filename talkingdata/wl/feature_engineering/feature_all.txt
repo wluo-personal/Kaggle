@@ -1,1 +1,1 @@
-all 51:   ip_app_device_os_channel_lasttimediff   			 size: 44.72278072685003 G.
+all 28:   ip_app_device_os_lasttimediff   			 size: 5.459996342658997 G.
