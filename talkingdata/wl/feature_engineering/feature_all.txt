@@ -1,1 +1,1 @@
-all 28:   ip_app_device_os_lasttimediff   			 size: 5.459996342658997 G.
+all 21:   ip_app_device_os_regression   			 size: 4.948489688336849 G.
