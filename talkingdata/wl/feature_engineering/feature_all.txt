@@ -1,0 +1,1 @@
+all 37:   matrixFact_user_ip_item_appdeviceos   			 size: 0.0003054961562156677 G.

@@ -1,6 +1,7 @@
 *.npy
 toxic/sc/stacking/obj/
 *.csv
+*.json
 *.hdf5
 .ipynb_checkpoints
 toxic/jc/data
