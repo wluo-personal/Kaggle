@@ -1,0 +1,3 @@
+layer2_count_0_param0    leader board score: 0.9669
+layer2_count_1_param0    leader board score: 0.9668
+layer2_count_1_param0    leader board score: 0.9702

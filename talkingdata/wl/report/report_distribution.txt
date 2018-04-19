@@ -1,0 +1,137 @@
+on day7 day8 day9, 9hours training set:
+
+processing: app
+train index length is: 493
+test index length is: 417
+intersection index length is: 363
+---
+processing: device
+train index length is: 2111
+test index length is: 1985
+intersection index length is: 1357
+---
+processing: os
+train index length is: 437
+test index length is: 395
+intersection index length is: 291
+---
+processing: channel
+train index length is: 191
+test index length is: 178
+intersection index length is: 176
+---
+
+================================================
+on whole training set:
+processing: app
+train index length is: 706
+test index length is: 417
+intersection index length is: 393
+---
+processing: device
+train index length is: 3475
+test index length is: 1985
+intersection index length is: 1661
+---
+processing: os
+train index length is: 800
+test index length is: 395
+intersection index length is: 339
+---
+processing: channel
+train index length is: 202
+test index length is: 178
+intersection index length is: 178
+---
+
+============ temp
+processing: app
+train index length is: 480
+test index length is: 417
+intersection index length is: 363
+---
+processing: device
+train index length is: 2333
+test index length is: 1985
+intersection index length is: 1441
+---
+processing: os
+train index length is: 470
+test index length is: 395
+intersection index length is: 295
+---
+processing: channel
+train index length is: 187
+test index length is: 178
+intersection index length is: 176
+---
+==================================================================================
+channel:
+equalHour: 178/178           whole: 178/178      ori: 176/178
+
+app:
+equalHour: 372/417           whole: 393/417       ori:363/417
+
+device:
+equalHour: 1437/1985           whole: 1661/1985   ori: 1441/1985
+
+os:
+equalHour: 300/395           whole: 339/395       ori: 295/395
+
+0 89%
+
+
+
+
+
+
+
+
+importance:
+channel                                   1663
+os                                         783
+app                                        596
+ip_app_device_os_time2nextclick            578
+matrixFact_user_ip_item_appdeviceos        369
+matrixFact_user_iposdeviceapp_item_app     331
+ip_day_hour_count                          328
+ip_device_os_count                         235
+ip_app_device_os_count                     209
+ip_app_device_os_lasttimediff              208
+hour                                       168
+ip_device_os_lasttimediff                  149
+ip_app_device_time2nextclick               139
+ip_app_device_lasttimediff                 138
+ip_app_device_time2previousclick           135
+ip_app_device_countfrompast                134
+ip_device_os_mean                          129
+ip_app_device_countfromfuture              121
+app_day_hour_count                         115
+ip_app_os_day_hour_count                   115
+ip_app_device_os_countfromfuture           107
+ip_app_device_mean                         104
+ip_device_os_regression                    103
+ip_app_device_os_time2previousclick         99
+ip_app_day_hour_count                       98
+ip_device_os_countfrompast                  97
+ip_os_day_hour_count                        96
+ip_app_device_regression                    95
+ip_device_os_countfromfuture                94
+ip_device_os_time2previousclick             82
+ip_device_os_time2nextclick                 82
+device                                      71
+ip_app_device_os_countfrompast              61
+ip_app_device_os_mean                       20
+ip_app_device_os_regression                  8
+
+
+
+#################################
+There are 820 more records on train.
+
+
+only apear on test:
+app: 4436 records
+device: 77196
+os:128743
+total unique: 130073
