@@ -1,1 +1,1 @@
-all 23:   ip_device_os_time2previousclick   			 size: 16.72652366012335 G.
+all 1:   attributed_timediff   			 size: 5.144253917038441 G.
