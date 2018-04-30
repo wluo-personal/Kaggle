@@ -326,3 +326,136 @@ params = {
         'scale_pos_weight': 400,
         'metric' : [ 'auc']
     }
+    
+    
+    
+ ######################### 0.9785   
+ app_os
+ app_device
+ device_os
+ app_device_os
+ 
+app_device_os                             901
+app_os                                    691
+channel                                   652
+ip_app_device_os_time2nextclick           264
+ip_app_device_os_lasttimediff             185
+device_os                                 170
+app_device                                165
+matrixFact_user_ip_item_appdeviceos       143
+ip_day_hour_count                         129
+app                                        95
+matrixFact_user_iposdeviceapp_item_app     94
+ip_device_os_count                         92
+hour                                       89
+ip_app_device_os_countfromfuture           87
+os                                         75
+ip_device_os_lasttimediff                  70
+ip_app_os_day_hour_count                   60
+ip_app_device_time2nextclick               46
+ip_app_device_mean                         39
+ip_app_device_regression                   38
+ip_app_device_os_count                     30
+ip_app_device_lasttimediff                 29
+ip_app_device_countfromfuture              22
+ip_device_os_mean                          22
+ip_device_os_countfromfuture               20
+ip_device_os_regression                    19
+app_day_hour_count                         16
+ip_app_device_countfrompast                16
+ip_app_device_os_time2previousclick        14
+ip_device_os_countfrompast                  8
+ip_device_os_time2nextclick                 7
+ip_app_day_hour_count                       7
+ip_os_day_hour_count                        7
+ip_app_device_time2previousclick            6
+ip_device_os_time2previousclick             5
+device                                      3
+ip_app_device_os_countfrompast              3
+ip_app_device_os_mean                       1
+ip_app_device_os_regression                 0
+
+
+
+
+
+##################### device - os
+importance -split
+channel                                   1358
+device_os                                  723
+app                                        377
+ip_app_device_os_time2nextclick            288
+ip_app_device_os_lasttimediff              247
+os                                         244
+matrixFact_user_ip_item_appdeviceos        235
+ip_day_hour_count                          216
+ip_device_os_count                         189
+matrixFact_user_iposdeviceapp_item_app     174
+ip_app_device_os_countfromfuture           157
+hour                                       154
+ip_app_os_day_hour_count                   118
+ip_app_device_time2nextclick               110
+ip_device_os_lasttimediff                  104
+ip_app_device_lasttimediff                  89
+ip_device_os_countfromfuture                73
+app_day_hour_count                          73
+ip_app_device_os_count                      71
+ip_app_device_regression                    65
+ip_app_device_countfromfuture               65
+ip_app_device_mean                          65
+ip_app_device_os_time2previousclick         54
+ip_device_os_regression                     49
+ip_device_os_time2nextclick                 47
+ip_app_device_countfrompast                 46
+ip_app_day_hour_count                       45
+ip_app_device_time2previousclick            40
+ip_device_os_mean                           38
+ip_device_os_time2previousclick             35
+ip_os_day_hour_count                        30
+ip_device_os_countfrompast                  29
+ip_app_device_os_countfrompast              16
+device                                       8
+ip_app_device_os_mean                        4
+ip_app_device_os_regression                  4
+
+importance - gain
+matrixFact_user_ip_item_appdeviceos       3.446741e+08
+matrixFact_user_iposdeviceapp_item_app    8.417493e+07
+channel                                   1.668758e+07
+device_os                                 1.108526e+07
+ip_app_device_os_time2nextclick           8.144030e+06
+app                                       6.917718e+06
+ip_app_device_os_lasttimediff             6.707789e+06
+ip_day_hour_count                         4.397688e+06
+ip_app_device_os_countfromfuture          3.394890e+06
+os                                        2.623705e+06
+ip_device_os_count                        2.545699e+06
+ip_app_os_day_hour_count                  2.149142e+06
+hour                                      1.961198e+06
+ip_app_device_time2nextclick              1.530539e+06
+ip_device_os_lasttimediff                 1.250323e+06
+ip_app_device_mean                        8.831188e+05
+ip_app_device_regression                  8.715329e+05
+ip_app_device_lasttimediff                8.461638e+05
+ip_device_os_countfromfuture              7.424633e+05
+app_day_hour_count                        7.042742e+05
+ip_app_device_os_count                    6.330087e+05
+ip_app_device_countfromfuture             5.044614e+05
+ip_app_device_countfrompast               3.511220e+05
+ip_device_os_regression                   3.506568e+05
+ip_app_device_os_time2previousclick       3.470616e+05
+ip_device_os_time2nextclick               3.436482e+05
+ip_app_day_hour_count                     2.386461e+05
+ip_device_os_mean                         2.327268e+05
+ip_os_day_hour_count                      2.162918e+05
+ip_app_device_time2previousclick          2.134048e+05
+ip_device_os_countfrompast                2.018109e+05
+ip_device_os_time2previousclick           1.684068e+05
+ip_app_device_os_countfrompast            9.928978e+04
+device                                    4.484728e+04
+ip_app_device_os_regression               2.919343e+04
+ip_app_device_os_mean                     1.788402e+04
+
+
+
+
