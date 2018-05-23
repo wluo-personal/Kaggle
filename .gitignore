@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 *.ftr
 *.npy
 *.csv
@@ -16,6 +17,8 @@ toxic/sc/stacking/obj/
 
 
 =======
+=======
+>>>>>>> b2457b082fe748781adafe76607becab16758a0f
 *.npy
 toxic/sc/stacking/obj/
 *.csv
@@ -24,6 +27,9 @@ toxic/sc/stacking/obj/
 .ipynb_checkpoints
 toxic/jc/data
 *.pyc
+<<<<<<< HEAD
+>>>>>>> b2457b082fe748781adafe76607becab16758a0f
+=======
 >>>>>>> b2457b082fe748781adafe76607becab16758a0f
 # Compiled source #
 ###################
