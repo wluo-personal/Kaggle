@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 *.ftr
 *.npy
 *.csv
@@ -14,6 +15,16 @@ talkingdata/sc/LibFM/data
 toxic/sc/stacking/obj/
 
 
+=======
+*.npy
+toxic/sc/stacking/obj/
+*.csv
+*.json
+*.hdf5
+.ipynb_checkpoints
+toxic/jc/data
+*.pyc
+>>>>>>> b2457b082fe748781adafe76607becab16758a0f
 # Compiled source #
 ###################
 *.com
