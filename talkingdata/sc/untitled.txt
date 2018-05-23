@@ -1,0 +1,234 @@
+{'app': 729, 'channel': 201, 'device': 3798, 'hour': 23, 'os': 855}
+
+
+
+
+5308912
+RocAuc evaluating batch size is: 100000
+Train on 41345165 samples, validate on 19534560 samples
+Epoch 1/8
+41200000/41345165 [============================>.] - ETA: 0s - loss: 0.1684 - acc: 0.9811
+on epoch end, start predicting validation set...
+19534560/19534560 [==============================] - 43s 2us/step
+start calculating ROC-AUC...
+ROC-AUC - epoch: 1 - score: 0.979120
+
+
+
+Epoch 00001: val_loss improved from inf to 0.05348, saving model to NN_batchsize200000_ep8_5308912.hdf5
+41345165/41345165 [==============================] - 270s 7us/step - loss: 0.1682 - acc: 0.9811 - val_loss: 0.0535 - val_acc: 0.9852
+Epoch 2/8
+41200000/41345165 [============================>.] - ETA: 0s - loss: 0.1481 - acc: 0.9862
+on epoch end, start predicting validation set...
+19534560/19534560 [==============================] - 43s 2us/step
+start calculating ROC-AUC...
+ROC-AUC - epoch: 2 - score: 0.980779
+
+
+
+Epoch 00002: val_loss did not improve
+41345165/41345165 [==============================] - 269s 6us/step - loss: 0.1480 - acc: 0.9862 - val_loss: 0.0561 - val_acc: 0.9853
+Epoch 3/8
+41200000/41345165 [============================>.] - ETA: 0s - loss: 0.1450 - acc: 0.9862
+on epoch end, start predicting validation set...
+19534560/19534560 [==============================] - 43s 2us/step
+start calculating ROC-AUC...
+ROC-AUC - epoch: 3 - score: 0.980984
+
+
+
+Epoch 00003: val_loss did not improve
+41345165/41345165 [==============================] - 269s 7us/step - loss: 0.1450 - acc: 0.9862 - val_loss: 0.0600 - val_acc: 0.9842
+Epoch 4/8
+41200000/41345165 [============================>.] - ETA: 0s - loss: 0.1435 - acc: 0.9864
+on epoch end, start predicting validation set...
+19534560/19534560 [==============================] - 43s 2us/step
+start calculating ROC-AUC...
+ROC-AUC - epoch: 4 - score: 0.981026
+
+
+
+Epoch 00004: val_loss did not improve
+41345165/41345165 [==============================] - 268s 6us/step - loss: 0.1436 - acc: 0.9864 - val_loss: 0.0641 - val_acc: 0.9831
+Epoch 5/8
+41200000/41345165 [============================>.] - ETA: 0s - loss: 0.1424 - acc: 0.9865
+on epoch end, start predicting validation set...
+19534560/19534560 [==============================] - 43s 2us/step
+start calculating ROC-AUC...
+ROC-AUC - epoch: 5 - score: 0.981683
+
+
+
+Epoch 00005: val_loss did not improve
+41345165/41345165 [==============================] - 268s 6us/step - loss: 0.1424 - acc: 0.9865 - val_loss: 0.0556 - val_acc: 0.9844
+Epoch 6/8
+41200000/41345165 [============================>.] - ETA: 0s - loss: 0.1415 - acc: 0.9865
+on epoch end, start predicting validation set...
+19534560/19534560 [==============================] - 43s 2us/step
+start calculating ROC-AUC...
+ROC-AUC - epoch: 6 - score: 0.981814
+
+
+
+Epoch 00006: val_loss improved from 0.05348 to 0.05341, saving model to NN_batchsize200000_ep8_5308912.hdf5
+41345165/41345165 [==============================] - 268s 6us/step - loss: 0.1414 - acc: 0.9865 - val_loss: 0.0534 - val_acc: 0.9871
+Epoch 7/8
+41200000/41345165 [============================>.] - ETA: 0s - loss: 0.1408 - acc: 0.9865
+on epoch end, start predicting validation set...
+19534560/19534560 [==============================] - 43s 2us/step
+start calculating ROC-AUC...
+ROC-AUC - epoch: 7 - score: 0.981756
+
+
+
+Epoch 00007: val_loss did not improve
+41345165/41345165 [==============================] - 268s 6us/step - loss: 0.1408 - acc: 0.9865 - val_loss: 0.0628 - val_acc: 0.9843
+Epoch 8/8
+41200000/41345165 [============================>.] - ETA: 0s - loss: 0.1401 - acc: 0.9866
+on epoch end, start predicting validation set...
+19534560/19534560 [==============================] - 43s 2us/step
+start calculating ROC-AUC...
+ROC-AUC - epoch: 8 - score: 0.981713
+
+
+
+Epoch 00008: val_loss did not improve
+41345165/41345165 [==============================] - 268s 6us/step - loss: 0.1401 - acc: 0.9866 - val_loss: 0.0609 - val_acc: 0.9843
+
+=============================================================================================================================
+Model ID: 5351614
+RocAuc evaluating batch size is: 100000
+Train on 41345165 samples, validate on 19534560 samples
+Epoch 1/8
+41200000/41345165 [============================>.] - ETA: 0s - loss: 0.1691 - acc: 0.9834
+on epoch end, start predicting validation set...
+19534560/19534560 [==============================] - 42s 2us/step
+start calculating ROC-AUC...
+ROC-AUC - epoch: 1 - score: 0.978540
+
+
+
+Epoch 00001: val_loss improved from inf to 0.06048, saving model to NN_data41345165_batchsize200000_ep8_5351614.hdf5
+41345165/41345165 [==============================] - 276s 7us/step - loss: 0.1690 - acc: 0.9835 - val_loss: 0.0605 - val_acc: 0.9849
+Epoch 2/8
+41200000/41345165 [============================>.] - ETA: 0s - loss: 0.1489 - acc: 0.9862
+on epoch end, start predicting validation set...
+19534560/19534560 [==============================] - 42s 2us/step
+start calculating ROC-AUC...
+ROC-AUC - epoch: 2 - score: 0.979925
+
+
+
+Epoch 00002: val_loss did not improve
+41345165/41345165 [==============================] - 274s 7us/step - loss: 0.1489 - acc: 0.9862 - val_loss: 0.0709 - val_acc: 0.9816
+Epoch 3/8
+41200000/41345165 [============================>.] - ETA: 0s - loss: 0.1461 - acc: 0.9864
+on epoch end, start predicting validation set...
+19534560/19534560 [==============================] - 42s 2us/step
+start calculating ROC-AUC...
+ROC-AUC - epoch: 3 - score: 0.980640
+
+
+
+Epoch 00003: val_loss improved from 0.06048 to 0.05163, saving model to NN_data41345165_batchsize200000_ep8_5351614.hdf5
+41345165/41345165 [==============================] - 274s 7us/step - loss: 0.1461 - acc: 0.9864 - val_loss: 0.0516 - val_acc: 0.9852
+Epoch 4/8
+41200000/41345165 [============================>.] - ETA: 0s - loss: 0.1444 - acc: 0.9863
+on epoch end, start predicting validation set...
+19534560/19534560 [==============================] - 42s 2us/step
+start calculating ROC-AUC...
+ROC-AUC - epoch: 4 - score: 0.980907
+
+
+
+Epoch 00004: val_loss improved from 0.05163 to 0.05136, saving model to NN_data41345165_batchsize200000_ep8_5351614.hdf5
+41345165/41345165 [==============================] - 276s 7us/step - loss: 0.1444 - acc: 0.9864 - val_loss: 0.0514 - val_acc: 0.9868
+Epoch 5/8
+41200000/41345165 [============================>.] - ETA: 0s - loss: 0.1430 - acc: 0.9865
+on epoch end, start predicting validation set...
+19534560/19534560 [==============================] - 43s 2us/step
+start calculating ROC-AUC...
+ROC-AUC - epoch: 5 - score: 0.981246
+
+
+
+Epoch 00005: val_loss did not improve
+41345165/41345165 [==============================] - 274s 7us/step - loss: 0.1430 - acc: 0.9865 - val_loss: 0.0607 - val_acc: 0.9833
+Epoch 6/8
+41200000/41345165 [============================>.] - ETA: 0s - loss: 0.1419 - acc: 0.9866
+on epoch end, start predicting validation set...
+19534560/19534560 [==============================] - 43s 2us/step
+start calculating ROC-AUC...
+ROC-AUC - epoch: 6 - score: 0.981267
+
+
+
+Epoch 00006: val_loss did not improve
+41345165/41345165 [==============================] - 273s 7us/step - loss: 0.1419 - acc: 0.9866 - val_loss: 0.0696 - val_acc: 0.9823
+Epoch 7/8
+41200000/41345165 [============================>.] - ETA: 0s - loss: 0.1412 - acc: 0.9866
+on epoch end, start predicting validation set...
+19534560/19534560 [==============================] - 42s 2us/step
+start calculating ROC-AUC...
+ROC-AUC - epoch: 7 - score: 0.981277
+
+
+
+Epoch 00007: val_loss did not improve
+41345165/41345165 [==============================] - 274s 7us/step - loss: 0.1412 - acc: 0.9866 - val_loss: 0.0552 - val_acc: 0.9847
+Epoch 8/8
+41200000/41345165 [============================>.] - ETA: 0s - loss: 0.1405 - acc: 0.9865
+on epoch end, start predicting validation set...
+19534560/19534560 [==============================] - 42s 2us/step
+start calculating ROC-AUC...
+ROC-AUC - epoch: 8 - score: 0.981493
+
+
+
+Epoch 00008: val_loss did not improve
+41345165/41345165 [==============================] - 274s 7us/step - loss: 0.1405 - acc: 0.9866 - val_loss: 0.0522 - val_acc: 0.9857
+
+
+
+
+
+
+
+
+
+
+
+
+
+ss_ip_app_device_os_time2previousclick -4.982598400515375e-17 0.024773937859798093
+ss_ip_app_device_mean 7.540797228873829e-19 0.03212167241955859
+ss_ip_app_day_hour_count -3.832092863240237e-17 -0.03971174021142749
+ss_ip_app_device_os_countfrompast 2.672997282998916e-17 -0.01694037465093912
+ss_ip_app_device_os_countfromfuture -2.1293969552910885e-17 -0.023730980798660945
+ss_ip_device_os_mean 1.4639020504924727e-17 0.0391170518298525
+ss_ip_app_os_day_hour_count -7.159614072249437e-18 -0.034969883464774885
+ss_ip_device_os_firsttimediff -2.595388112200093e-16 -0.024230394868122222
+ss_ip_app_device_countfromfuture 1.5435933730102724e-17 -0.025652275226938717
+ss_ip_device_os_time2previousclick -5.891182184253759e-18 0.014420249096518366
+ss_ip_device_os_countfromfuture -6.8272167574710336e-18 -0.012835057267286855
+ss_ip_app_device_countfrompast 6.727124082908548e-17 -0.014510626677935063
+ss_ip_device_os_lasttimediff 2.469450612713264e-16 -0.0586067098110574
+ss_ip_app_device_os_mean 8.596765608504827e-17 0.032286194145425405
+ss_ip_app_device_os_time2nextclick -3.566735231610961e-18 0.021129650188321088
+ss_matrixFact_user_iposdeviceapp_item_app 1.425784295050227e-14 0.07583786235029019
+ss_ip_device_os_time2nextclick -2.8612312679970235e-17 0.007761519019529632
+ss_ip_app_device_os_firsttimediff 6.610598282671625e-17 -0.012269505619620707
+ss_ip_app_device_time2nextclick -4.832832868800611e-18 0.0289993062135463
+ss_ip_app_device_lasttimediff 1.1165561935522649e-16 -0.03057386436489185
+ss_ip_day_hour_count -1.6634804944078765e-17 -0.0112656764725749
+ss_ip_device_os_countfrompast -2.6623530993234278e-17 -0.004820305460849582
+ss_ip_app_device_os_lasttimediff 1.447907763969568e-16 -0.046526963360938006
+ss_matrixFact_user_ipchannel_item_appdeviceos -8.10101928972122e-15 -0.0050771496187175845
+ss_ip_os_day_hour_count 2.054140709304742e-20 -0.02233432067765848
+ss_ip_device_os_count 1.3921471807151682e-17 -0.0019532830302567777
+ss_ip_app_device_os_count -7.803867294713197e-18 -0.013249414366967511
+ss_app_device_os_mean -4.9545873908430377e-17 0.03797578427340154
+ss_matrixFact_user_ip_item_appdeviceos 6.475220139224895e-15 -0.0052719122361819925
+ss_app_day_hour_count 1.2350987864855967e-16 -0.2597733996240182
+ss_ip_app_device_time2previousclick 6.91166995163313e-17 0.02040930883640263
+ss_ip_app_device_firsttimediff 2.1443735084625648e-16 0.025929875207029347

@@ -1,11 +1,18 @@
+*.ftr
 *.npy
-toxic/sc/stacking/obj/
 *.csv
 *.json
 *.hdf5
-.ipynb_checkpoints
-toxic/jc/data
+*.ipynb_checkpoints
 *.pyc
+*.pickle
+
+
+toxic/jc/data
+talkingdata/sc/LibFM/data
+toxic/sc/stacking/obj/
+
+
 # Compiled source #
 ###################
 *.com
